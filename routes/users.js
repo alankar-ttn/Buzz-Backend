@@ -11,6 +11,43 @@ router.get("/profile", auth, async (req, res) => {
 	res.send(user);
 });
 
+router.post("userprofile/:id" , async (req, res) =>  {
+          const user = await User.findById(req.params.id);
+
+          if (user) {
+              user.firstName = req.body.firstName || user.firstName;
+              user.lastName = req.body.lastName || user.lastName;
+              user.designation = req.body.designation || user.designation;
+              user.website = req.body.website || user.website;
+              user.gender = req.body.gender || user.gender;
+              user.dateOfBirth = req.body.dateOfBirth || user.dateOfBirth;
+              user.city = req.body.city || user.city;
+              user.state = req.body.state || user.state;
+              user.pincode = req.body.pincode || user.pincode;
+              user.profileImage = req.body.profileImage || user.profileImage;
+
+              const updatedUser = await user.save();
+
+              res.json({
+                  _id:updatedUser._id,
+                  firstName:updatedUser.firstName,
+                  lastName:updatedUser.lastName,
+                  designation:updatedUser.designation,
+                  website:updatedUser.website,
+                  gender:updatedUser.gender,
+                  dateOfBirth:updatedUser.dateOfBirth,
+                  city:updatedUser.city,
+                  state:updatedUser.state,
+                  pincode:updatedUser.pincode,
+                  profileImage:updatedUser.profileImage,
+                  token:generateToken(updatedUser._id),
+              });
+          } else {
+              res.status(404);
+              throw new Error("User not found !");
+          }
+      });
+
 router.post("/register", async (req, res) => {
     const { error } = validateRegister(req.body);
     if (error) return res.status(400).send(error.details[0].message);
