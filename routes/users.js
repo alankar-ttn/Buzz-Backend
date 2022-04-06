@@ -11,7 +11,7 @@ router.get("/profile", auth, async (req, res) => {
 	res.send(user);
 });
 
-router.post("userprofile/:id" , async (req, res) =>  {
+router.post("/:id/userprofile" , async (req, res) =>  {
           const user = await User.findById(req.params.id);
 
           if (user) {
@@ -28,7 +28,7 @@ router.post("userprofile/:id" , async (req, res) =>  {
 
               const updatedUser = await user.save();
 
-              res.json({
+              res.json({ 
                   _id:updatedUser._id,
                   firstName:updatedUser.firstName,
                   lastName:updatedUser.lastName,
@@ -40,7 +40,6 @@ router.post("userprofile/:id" , async (req, res) =>  {
                   state:updatedUser.state,
                   pincode:updatedUser.pincode,
                   profileImage:updatedUser.profileImage,
-                  token:generateToken(updatedUser._id),
               });
           } else {
               res.status(404);
