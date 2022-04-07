@@ -11,6 +11,8 @@ router.get("/profile", auth, async (req, res) => {
 	res.send(user);
 });
 
+// user : update profile
+
 router.post("/:id/userprofile" , async (req, res) =>  {
           const user = await User.findById(req.params.id);
 
@@ -46,6 +48,28 @@ router.post("/:id/userprofile" , async (req, res) =>  {
               throw new Error("User not found !");
           }
       });
+
+// user - friend request sent and received
+
+router.put("/:id/friendRequest", async (req,res)=>{
+    if(req.body.userId !== req.params.id){
+        try{
+            const user = await User.findById(req.params.id);
+            const currentUser = await User.findById(req.body.userId);
+            if(!user.friendRequestsSent.includes(req.body.userId)){
+                await user.updateOne({ $push: { friendRequestsSent: req.body.userId } });
+                await currentUser.updateOne({ $push: { friendRequestsReceived: req.params.id } });
+                res.status(200).send("the request has been sent");
+            } else{
+                res.status(403).send("you already sent the request to this user")
+            }
+        }catch(err){
+            res.status(500).send("Error",err)
+        }
+    }else{
+        res.status(403).send("you cant send request")
+    }
+})
 
 router.post("/register", async (req, res) => {
     const { error } = validateRegister(req.body);
