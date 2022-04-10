@@ -54,6 +54,7 @@ router.post("/register/google", async (req, res) => {
 			lastName: req.body.lastName,
 			email: req.body.email,
 			password: "123456",
+			profileImage: req.body.profileImage
 		});
 
 		await user.save();

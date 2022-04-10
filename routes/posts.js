@@ -11,7 +11,12 @@ router.post("/", auth, async (req, res) => {
         caption: req.body.caption,
         images: req.body.images,
         videos: req.body.videos,
-        user: req.user._id
+        user: {
+            _id: req.user._id,
+            firstName: req.user.firstName,
+            lastName: req.user.lastName,
+            profileImage: req.user.profileImage
+        }
     });
 
     await post.save();
