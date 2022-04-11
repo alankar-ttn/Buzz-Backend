@@ -30,6 +30,14 @@ const validateLogin = (user) => {
     return schema.validate(user);
 }
 
+const validateComment = (comment) => {
+    const schema = Joi.object({
+        comment: Joi.string().min(2).max(255).required(),
+    });
+    return schema.validate(comment);
+}
+
 exports.validateRegister = validateRegister;
 exports.validateGoogleRegister = validateGoogleRegister;
 exports.validateLogin = validateLogin;
+exports.validateComment = validateComment;

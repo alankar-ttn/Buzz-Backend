@@ -52,11 +52,18 @@ const postSchema = new mongoose.Schema({
     comments: [
         {
             user: {
-                type: mongoose.Schema.Types.ObjectId,
-                ref: "User",
+                type: String,
                 required: true
             },
-            text: {
+            name: {
+                type: String,
+                required: true
+            },
+            profileImage: {
+                type: String,
+                required: true
+            },
+            comment: {
                 type: String,
                 required: true,
                 minlength: 5,
