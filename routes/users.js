@@ -80,6 +80,28 @@ router.put("/:id/friendRequest", async (req, res) => {
 	}
 });
 
+// user - friend request delete
+
+router.put("/:id/friendRequestDelete", async (req,res)=>{
+    if(req.body.userId !== req.params.id){
+        try{
+            const user = await User.findById(req.params.id);
+            const currentUser = await User.findById(req.body.userId);
+            if(user.friendRequestsSent.includes(req.body.userId)){
+                await user.updateOne({ $pull: { friendRequestsSent: req.body.userId } });
+                await currentUser.updateOne({ $pull: { friendRequestsReceived: req.params.id } });
+                res.status(200).send("the request has been deleted");
+            } else{
+                res.status(403).send("you already deleted the request to this user")
+            }
+        }catch(err){
+            res.status(500).send("Error",err)
+        }
+    }else{
+        res.status(403).send("you cant delete friend request")
+    }
+})
+
 router.post("/register", async (req, res) => {
 	const { error } = validateRegister(req.body);
 	if (error) return res.status(400).send(error.details[0].message);
