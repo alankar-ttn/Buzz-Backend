@@ -25,48 +25,70 @@ router.post("/", auth, async (req, res) => {
 });
 
 router.get("/", auth, async (req, res) => {
+	const skip =
+		req.query.skip && /^\d+$/.test(req.query.skip)
+			? Number(req.query.skip)
+			: 0;
+	console.log(skip)
 	const posts = await Post.find().sort({ dateCreated: -1 });
 	res.send(posts);
 });
 
-router.post("/:id/likes", auth, async (req, res) => {
-	const post = await Post.findById(req.params.id);
-	if (!post) return res.status(404).send("Post not found.");
+router.post("/:postId/report", auth, async (req, res) => {
+	const post = await Post.findById(req.params.postId);
+	if (!post) return res.status(404).send("Post not found");
 
-	await Post.updateOne(
-		{ _id: req.params.id },
-		{
-			$push: {
-				likes: {
-					user: req.user.user,
-					name: req.user.firstName + " " + req.user.lastName,
-				},
-			},
-		}
-	);
-	return res.status(200).send(post.likes);
+	await post.updateOne({
+		reported: req.body.reported,
+	});
+	return res.status(200).send("Post reported");
 });
 
-router.post("/:id/:likeId/unlikes", auth, async (req, res) => {
-	const post = await Post.findById(req.params.id);
+router.post("/:postId/reaction", auth, async (req, res) => {
+	const post = await Post.findById(req.params.postId);
 	if (!post) return res.status(404).send("Post not found.");
 
-    const like = await Post.findById(req.params.id);
-    console.log(like)
-    console.log(like.likes.find(like => like._id === req.params.likeId)); 
-    if (!like) return res.status(404).send("Like not found.");
+	const reaction = req.body.reaction;
 
-	await Post.updateOne(
-		{ _id: req.params.id },
-		{
-			$pull: {
+	if (reaction === "like") {
+		await post.updateOne({
+			$push: {
 				likes: {
-					_id: req.params.likeId,
+					name: req.user.firstName + " " + req.user.lastName,
+					profileImage: req.user.profileImage,
+					user: req.user.uid,
 				},
 			},
-		}
-	);
-	return res.status(200).send("Post Unliked");
+			$pull: {
+				dislikes: {
+					name: req.user.firstName + " " + req.user.lastName,
+					profileImage: req.user.profileImage,
+					user: req.user.uid,
+				},
+			},
+		});
+		return res.status(200).send("Like added.");
+	} else if (reaction === "dislike") {
+		await post.updateOne({
+			$pull: {
+				likes: {
+					name: req.user.firstName + " " + req.user.lastName,
+					profileImage: req.user.profileImage,
+					user: req.user.uid,
+				},
+			},
+			$push: {
+				dislikes: {
+					name: req.user.firstName + " " + req.user.lastName,
+					profileImage: req.user.profileImage,
+					user: req.user.uid,
+				},
+			},
+		});
+		return res.status(200).send("Dislike added.");
+	} else {
+		return res.status(400).send("Invalid reaction");
+	}
 });
 
 router.get("/:id/comments", auth, async (req, res) => {
@@ -91,8 +113,8 @@ router.post("/:id/comments", auth, async (req, res) => {
 					user: req.user.user,
 					name: req.user.firstName + " " + req.user.lastName,
 					profileImage: req.user.profileImage,
-					comment: req.body.comment
-				}, 
+					comment: req.body.comment,
+				},
 			},
 		}
 	);

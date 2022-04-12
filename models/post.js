@@ -29,13 +29,16 @@ const postSchema = new mongoose.Schema({
     likes: [
         {
             user: {
-                type: mongoose.Schema.Types.ObjectId,
-                ref: "User",
+                type: String,
                 required: true,
                 unique: true
             },
             name: {
                 type: String, 
+                required: true
+            },
+            profileImage: {
+                type: String,
                 required: true
             }
         }
@@ -43,8 +46,16 @@ const postSchema = new mongoose.Schema({
     dislikes: [
         {
             user: {
-                type: mongoose.Schema.Types.ObjectId,
-                ref: "User",
+                type: String,
+                required: true,
+                unique: true
+            },
+            name: {
+                type: String, 
+                required: true
+            },
+            profileImage: {
+                type: String,
                 required: true
             }
         }
@@ -74,7 +85,11 @@ const postSchema = new mongoose.Schema({
                 default: Date.now,
             }
         }
-    ]
+    ],
+    reported: {
+        type: Boolean,
+        default: false
+    }
 });
 
 const Post = mongoose.model("Post", postSchema);
@@ -89,7 +104,8 @@ function validatePost(post) {
         videos: Joi.array(),
         likes: Joi.array(),
         dislikes: Joi.array(),
-        comments: Joi.array()
+        comments: Joi.array(),
+        reported: Joi.boolean()
     });
 
     return schema.validate(post);
