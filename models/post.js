@@ -6,7 +6,7 @@ const postSchema = new mongoose.Schema({
     caption: {
         type: String,
         required: true,
-        minlength: 5,
+        minlength: 1,
         maxlength: 255
     },
     images: {
@@ -31,7 +31,7 @@ const postSchema = new mongoose.Schema({
             user: {
                 type: String,
                 required: true,
-                unique: true
+                // unique: true
             },
             name: {
                 type: String, 
@@ -48,7 +48,7 @@ const postSchema = new mongoose.Schema({
             user: {
                 type: String,
                 required: true,
-                unique: true
+                //unique: true
             },
             name: {
                 type: String, 
@@ -97,7 +97,7 @@ const Post = mongoose.model("Post", postSchema);
 function validatePost(post) {
     const schema = Joi.object({
         caption: Joi.string()
-            .min(5)
+            .min(1)
             .max(255)
             .required(),
         images: Joi.array(),
