@@ -21,7 +21,7 @@ router.get("/users", auth, async (req, res) => {
 	res.send(users);
 });
 
-router.get(":id/profile", auth, async (req, res) => {
+router.get("/:id/profile", auth, async (req, res) => {
 	const user = await User.findById(req.params.id).select("-password");
 	res.send(user);
 })
@@ -35,7 +35,7 @@ router.post("/:id/userprofile", async (req, res) => {
 		user.firstName = req.body.firstName || user.firstName;
 		user.lastName = req.body.lastName || user.lastName;
 		user.designation = req.body.designation || user.designation;
-		user.website = req.body.website || user.website;
+		user.website = req.body.website;
 		user.gender = req.body.gender || user.gender;
 		user.dateOfBirth = req.body.dateOfBirth || user.dateOfBirth;
 		user.city = req.body.city || user.city;

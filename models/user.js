@@ -48,7 +48,6 @@ const userSchema = new mongoose.Schema({
 	website: {
 		type: String,
 		required: false,
-		minlength: 5,
 		maxlength: 50,
 	},
 	gender: {
@@ -116,7 +115,7 @@ function validateUser(user) {
 		password: Joi.string().min(5).max(255).required(),
 		isAdmin: Joi.boolean(),
 		designation: Joi.string().min(5).max(50),
-		website: Joi.string().min(5).max(50),
+		website: Joi.string().max(50),
 		gender: Joi.string().min(4).max(6).required(),
 		dateOfBirth: Joi.date(),
 		city: Joi.string().min(3).max(50),
