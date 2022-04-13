@@ -16,6 +16,7 @@ router.get("/profile", auth, async (req, res) => {
 
 router.get("/users", auth, async (req, res) => {
 	const users = await User.find({
+		_id: { $ne: req.user._id },
 		friends: { $nin: [req.user.uid] },
 	}).select("_id email firstName lastName profileImage");
 	res.send(users);
@@ -66,17 +67,17 @@ router.post("/:id/userprofile", async (req, res) => {
 
 // user - friend request sent and received
 
-router.put("/:id/friendRequest", async (req, res) => {
+router.put("/:id/sendFriendRequest", async (req, res) => {
 	if (req.body.userId !== req.params.id) {
 		try {
 			const user = await User.findById(req.params.id);
 			const currentUser = await User.findById(req.body.userId);
 			if (!user.friendRequestsSent.includes(req.body.userId)) {
 				await user.updateOne({
-					$push: { friendRequestsSent: req.body.userId },
+					$push: { friendRequestsReceived: req.body.userId },
 				});
 				await currentUser.updateOne({
-					$push: { friendRequestsReceived: req.params.id },
+					$push: { friendRequestsSent: req.params.id },
 				});
 				res.status(200).send("the request has been sent");
 			} else {
@@ -92,6 +93,34 @@ router.put("/:id/friendRequest", async (req, res) => {
 	}
 });
 
+router.put("/:id/acceptFriendRequest", async (req, res) => {
+	if (req.body.userId !== req.params.id) {
+		try {
+			const user = await User.findById(req.params.id);
+			const currentUser = await User.findById(req.body.userId);
+			if (user.friendRequestsSent.includes(req.body.userId)) {
+				await currentUser.updateOne({
+					$push: { friends: req.params.id },
+					$pull: { friendRequestsReceived: req.params.id },
+				});
+				await user.updateOne({
+					$push: { friends: req.body.userId },
+					$pull: { friendRequestsSent: req.body.userId },
+				});
+				res.status(200).send("the request has been accepted");
+			} else {
+				res.status(403).send(
+					"you dont have any request from this user"
+				);
+			}
+		} catch (err) {
+			res.status(500).send("Error", err);
+		}
+	} else {
+		res.status(403).send("you cant accept request");
+	}
+});
+
 // user - friend request delete
 
 router.put("/:id/friendRequestDelete", async (req,res)=>{
@@ -100,8 +129,8 @@ router.put("/:id/friendRequestDelete", async (req,res)=>{
             const user = await User.findById(req.params.id);
             const currentUser = await User.findById(req.body.userId);
             if(user.friendRequestsSent.includes(req.body.userId)){
-                await user.updateOne({ $pull: { friendRequestsSent: req.body.userId } });
-                await currentUser.updateOne({ $pull: { friendRequestsReceived: req.params.id } });
+                await currentUser.updateOne({ $pull: { friendRequestsSent: req.body.userId } });
+                await user.updateOne({ $pull: { friendRequestsReceived: req.params.id } });
                 res.status(200).send("the request has been deleted");
             } else{
                 res.status(403).send("you already deleted the request to this user")
@@ -147,11 +176,11 @@ router.post("/register/google", async (req, res) => {
 	const { error } = validateGoogleRegister(req.body);
 	if (error) return res.status(400).send(error.details[0].message);
 
-	let re = /[a-z0-9]+@tothenew.com/;
+	// let re = /[a-z0-9]+@tothenew.com/;
 
-	if (!re.test(req.body.email)) {
-		return res.status(403).send("Email is not valid");
-	}
+	// if (!re.test(req.body.email)) {
+	// 	return res.status(403).send("Email is not valid");
+	// }
 
 	let user = await User.findOne({ email: req.body.email });
 	if (user) {
