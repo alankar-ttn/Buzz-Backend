@@ -29,7 +29,6 @@ router.get("/", auth, async (req, res) => {
 		req.query.skip && /^\d+$/.test(req.query.skip)
 			? Number(req.query.skip)
 			: 0;
-	console.log(skip)
 	const posts = await Post.find().sort({ dateCreated: -1 });
 	res.send(posts);
 });

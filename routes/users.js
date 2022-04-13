@@ -12,7 +12,19 @@ const router = express.Router();
 router.get("/profile", auth, async (req, res) => {
 	const user = await User.findById(req.user._id).select("-password");
 	res.send(user);
-}); 
+});
+
+router.get("/users", auth, async (req, res) => {
+	const users = await User.find({
+		friends: { $nin: [req.user.uid] },
+	}).select("_id email firstName lastName profileImage");
+	res.send(users);
+});
+
+router.get(":id/profile", auth, async (req, res) => {
+	const user = await User.findById(req.params.id).select("-password");
+	res.send(user);
+})
 
 // user : update profile
 
