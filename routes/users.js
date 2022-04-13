@@ -147,6 +147,12 @@ router.post("/register/google", async (req, res) => {
 	const { error } = validateGoogleRegister(req.body);
 	if (error) return res.status(400).send(error.details[0].message);
 
+	let re = /[a-z0-9]+@tothenew.com/;
+
+	if (!re.test(req.body.email)) {
+		return res.status(403).send("Email is not valid");
+	}
+
 	let user = await User.findOne({ email: req.body.email });
 	if (user) {
 		return res.status(200).send(user);
