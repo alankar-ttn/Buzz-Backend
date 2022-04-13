@@ -4,18 +4,23 @@
   "description": "Backend for the Buzz Social Media app",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node index.js"
+  },
+  "engines": {
+    "node": "16.14.0"
   },
   "author": "",
   "license": "ISC",
   "dependencies": {
     "bcrypt": "^5.0.1",
+    "compression": "^1.7.4",
     "cors": "^2.8.5",
     "express": "^4.17.3",
     "firebase-admin": "^10.0.2",
+    "helmet": "^5.0.2",
     "joi": "^17.6.0",
     "joi-objectid": "^4.0.2",
-    "mongoose": "^6.2.10",
-    "nodemon": "^2.0.15"
+    "mongoose": "^6.2.10"
   }
 }

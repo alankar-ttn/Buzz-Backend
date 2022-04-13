@@ -6,6 +6,7 @@ app.use(cors())
 require("./startup/db")()
 require("./startup/routes")(app)
 require('./startup/validation')();
+require('./startup/prod')(app);
 
 const port = process.env.PORT || 5000;
 const server = app.listen(port, () => console.info(`Listening on port ${port}...`));
