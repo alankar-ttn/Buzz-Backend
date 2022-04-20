@@ -14,7 +14,6 @@ const userSchema = new mongoose.Schema({
 	},
 	lastName: {
 		type: String,
-		minlength: 1,
 		maxlength: 50,
 	},
 	email: {
@@ -109,7 +108,7 @@ const User = mongoose.model("User", userSchema);
 function validateUser(user) {
 	const schema = Joi.object({
 		firstName: Joi.string().min(2).max(50).required(),
-		lastName: Joi.string().min(1).max(50),
+		lastName: Joi.string().max(50),
 		email: Joi.string().min(5).max(255).required().email(),
 		password: Joi.string().min(5).max(255).required(),
 		isAdmin: Joi.boolean(),
