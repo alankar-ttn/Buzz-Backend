@@ -14,8 +14,8 @@ const validateRegister = (user) => {
 const validateGoogleRegister = (user) => {
     const schema = Joi.object({
         uid: Joi.string().min(5).max(255).required(),
-        firstName: Joi.string().min(5).max(50).required(),
-        lastName: Joi.string().min(1).max(50).required(),
+        firstName: Joi.string().min(2).max(50).required(),
+        lastName: Joi.string().max(50),
         email: Joi.string().min(5).max(255).required().email(),
         profileImage: Joi.string().min(5).max(255),
     });
