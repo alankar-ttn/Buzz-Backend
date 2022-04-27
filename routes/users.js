@@ -7,6 +7,7 @@ const {
 } = require("../services/validation");
 const bcrypt = require("bcrypt");
 const auth = require("../middleware/auth");
+const { Post } = require("../models/post");
 const router = express.Router();
 
 router.get("/profile", auth, async (req, res) => {
@@ -33,16 +34,17 @@ router.post("/:id/userprofile", async (req, res) => {
 	const user = await User.findById(req.params.id);
 
 	if (user) {
-		user.firstName = req.body.firstName || user.firstName;
-		user.lastName = req.body.lastName || user.lastName;
-		user.designation = req.body.designation || user.designation;
+		user.firstName = req.body.firstName;
+		user.lastName = req.body.lastName;
+		user.designation = req.body.designation;
 		user.website = req.body.website;
-		user.gender = req.body.gender || user.gender;
-		user.dateOfBirth = req.body.dateOfBirth || user.dateOfBirth;
-		user.city = req.body.city || user.city;
-		user.state = req.body.state || user.state;
-		user.pincode = req.body.pincode || user.pincode;
-		user.profileImage = req.body.profileImage || user.profileImage;
+		user.gender = req.body.gender;
+		user.dateOfBirth = req.body.dateOfBirth;
+		user.city = req.body.city;
+		user.state = req.body.state;
+		user.pincode = req.body.pincode;
+		user.profileImage = req.body.profileImage;
+		user.coverImage = req.body.coverImage;
 
 		const updatedUser = await user.save();
 
@@ -64,6 +66,81 @@ router.post("/:id/userprofile", async (req, res) => {
 		throw new Error("User not found !");
 	}
 });
+
+
+router.post("/:id/profileImage", async (req, res) => {
+	const user = await User.findById(req.params.id);
+
+	if (user) {
+		user.profileImage = req.body.profileImage;
+
+		const updatedUser = await user.save();
+
+		res.json({
+			_id: user._id,
+			firstName: user.firstName,
+			lastName: user.lastName,
+			designation: user.designation,
+			website: user.website,
+			gender: user.gender,
+			dateOfBirth: user.dateOfBirth,
+			city: user.city,
+			state: user.state,
+			pincode: user.pincode,
+			profileImage: updatedUser.profileImage,
+		});
+	} else {
+		res.status(404);
+		throw new Error("User not found !");
+	}
+});
+
+
+router.post("/:id/coverImage", async (req, res) => {
+	const user = await User.findById(req.params.id);
+
+	if (user) {
+		user.coverImage = req.body.coverImage;
+
+		const updatedUser = await user.save();
+
+		res.json({
+			_id: user._id,
+			firstName: user.firstName,
+			lastName: user.lastName,
+			designation: user.designation,
+			website: user.website,
+			gender: user.gender,
+			dateOfBirth: user.dateOfBirth,
+			city: user.city,
+			state: user.state,
+			pincode: user.pincode,
+			profileImage: user.profileImage,
+			coverImage: updatedUser.coverImage,
+		});
+	} else {
+		res.status(404);
+		throw new Error("User not found !");
+	}
+});
+
+router.put("/:id/addViews", auth, async (req, res) => {
+	const user = await User.findById(req.params.id);
+
+	if (user) {
+		user.profileViews = user.profileViews + 1;
+
+		const updatedUser = await user.save();
+
+		res.json({
+			_id: updatedUser._id,
+			profileViews: updatedUser.profileViews,
+		});
+	} else {
+		res.status(404);
+		throw new Error("User not found !");
+	}
+})
 
 // user - friend request sent and received
 
@@ -199,5 +276,12 @@ router.post("/register/google", async (req, res) => {
 		res.status(201).send({ data: "User Created Successfully." });
 	}
 });
+
+router.get("/:id/posts", auth, async (req, res) => {
+	const posts = await Post.find();
+	const userPosts = posts.filter((post) => post.user._id == req.params.id);
+	res.status(200).send(userPosts);
+})
+
 
 module.exports = router;

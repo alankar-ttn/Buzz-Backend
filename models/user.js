@@ -79,15 +79,11 @@ const userSchema = new mongoose.Schema({
 	profileImage: {
 		type: String,
 		required: false,
-		minlength: 5,
-		maxlength: 255,
 		default: "https://e7.pngegg.com/pngimages/799/987/png-clipart-computer-icons-avatar-icon-design-avatar-heroes-computer-wallpaper.png"
 	},
 	coverImage: {
 		type: String,
 		required: false,
-		minlength: 5,
-		maxlength: 255,
 	},
 	friends: {
 		type: Array,
@@ -100,6 +96,11 @@ const userSchema = new mongoose.Schema({
 	friendRequestsReceived: {
 		type: Array,
 		required: false,
+	},
+	profileViews: {
+		type: Number,
+		required: false,
+		default: 0,
 	},
 });
 
@@ -124,6 +125,7 @@ function validateUser(user) {
 		friends: Joi.array(),
 		friendRequestsSent: Joi.array(),
 		friendRequestsReceived: Joi.array(),
+		profileViews: Joi.number(),
 	});
 	return schema.validate(user);
 }
