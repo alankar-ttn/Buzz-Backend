@@ -10,11 +10,13 @@ const auth = require("../middleware/auth");
 const { Post } = require("../models/post");
 const router = express.Router();
 
+// Get data of current user
 router.get("/profile", auth, async (req, res) => {
 	const user = await User.findById(req.user._id).select("-password");
 	res.send(user);
 });
 
+// Get data of all users
 router.get("/users", auth, async (req, res) => {
 	const users = await User.find({
 		_id: { $ne: req.user._id },
@@ -23,13 +25,13 @@ router.get("/users", auth, async (req, res) => {
 	res.send(users);
 });
 
+// Get data of of particular user using its id
 router.get("/:id/profile", auth, async (req, res) => {
 	const user = await User.findById(req.params.id).select("-password");
 	res.send(user);
-})
+});
 
-// user : update profile
-
+// Update the profile of current user
 router.post("/:id/userprofile", async (req, res) => {
 	const user = await User.findById(req.params.id);
 
@@ -43,8 +45,6 @@ router.post("/:id/userprofile", async (req, res) => {
 		user.city = req.body.city;
 		user.state = req.body.state;
 		user.pincode = req.body.pincode;
-		user.profileImage = req.body.profileImage;
-		user.coverImage = req.body.coverImage;
 
 		const updatedUser = await user.save();
 
@@ -59,7 +59,8 @@ router.post("/:id/userprofile", async (req, res) => {
 			city: updatedUser.city,
 			state: updatedUser.state,
 			pincode: updatedUser.pincode,
-			profileImage: updatedUser.profileImage,
+			profileImage: user.profileImage,
+			coverImage: user.coverImage,
 		});
 	} else {
 		res.status(404);
@@ -67,7 +68,7 @@ router.post("/:id/userprofile", async (req, res) => {
 	}
 });
 
-
+// Update the profile image of current user
 router.post("/:id/profileImage", async (req, res) => {
 	const user = await User.findById(req.params.id);
 
@@ -95,7 +96,7 @@ router.post("/:id/profileImage", async (req, res) => {
 	}
 });
 
-
+// Update the cover image of current user
 router.post("/:id/coverImage", async (req, res) => {
 	const user = await User.findById(req.params.id);
 
@@ -124,6 +125,7 @@ router.post("/:id/coverImage", async (req, res) => {
 	}
 });
 
+// Add the views of the user
 router.put("/:id/addViews", auth, async (req, res) => {
 	const user = await User.findById(req.params.id);
 
@@ -140,10 +142,9 @@ router.put("/:id/addViews", auth, async (req, res) => {
 		res.status(404);
 		throw new Error("User not found !");
 	}
-})
+});
 
-// user - friend request sent and received
-
+// Sent friend request to a user
 router.put("/:id/sendFriendRequest", async (req, res) => {
 	if (req.body.userId !== req.params.id) {
 		try {
@@ -170,6 +171,7 @@ router.put("/:id/sendFriendRequest", async (req, res) => {
 	}
 });
 
+// Accept friend request of a user
 router.put("/:id/acceptFriendRequest", async (req, res) => {
 	if (req.body.userId !== req.params.id) {
 		try {
@@ -198,57 +200,34 @@ router.put("/:id/acceptFriendRequest", async (req, res) => {
 	}
 });
 
-// user - friend request delete
-
-router.put("/:id/friendRequestDelete", async (req,res)=>{
-    if(req.body.userId !== req.params.id){
-        try{
-            const user = await User.findById(req.params.id);
-            const currentUser = await User.findById(req.body.userId);
-            if(user.friendRequestsSent.includes(req.body.userId)){
-                await currentUser.updateOne({ $pull: { friendRequestsSent: req.body.userId } });
-                await user.updateOne({ $pull: { friendRequestsReceived: req.params.id } });
-                res.status(200).send("the request has been deleted");
-            } else{
-                res.status(403).send("you already deleted the request to this user")
-            }
-        }catch(err){
-            res.status(500).send("Error",err)
-        }
-    }else{
-        res.status(403).send("you cant delete friend request")
-    }
-})
-
-router.post("/register", async (req, res) => {
-	const { error } = validateRegister(req.body);
-	if (error) return res.status(400).send(error.details[0].message);
-
-	let user = await User.findOne({ email: req.body.email });
-	if (user) return res.status(400).send("User already registered.");
-
-	const salt = await bcrypt.genSalt(10);
-	const password = await bcrypt.hash(req.body.password, salt);
-
-	const userRecord = await admin.auth().createUser({
-		email: req.body.email,
-		password: password,
-		displayName: req.body.firstName + " " + req.body.lastName,
-	});
-
-	user = new User({
-		uid: userRecord.uid,
-		firstName: req.body.firstName,
-		lastName: req.body.lastName,
-		email: req.body.email,
-		password: password,
-		gender: req.body.gender,
-	});
-
-	await user.save();
-	res.status(201).send({ data: "User Created Successfully." });
+// Reject friend request of a user
+router.put("/:id/friendRequestDelete", async (req, res) => {
+	if (req.body.userId !== req.params.id) {
+		try {
+			const user = await User.findById(req.params.id);
+			const currentUser = await User.findById(req.body.userId);
+			if (user.friendRequestsSent.includes(req.body.userId)) {
+				await currentUser.updateOne({
+					$pull: { friendRequestsSent: req.body.userId },
+				});
+				await user.updateOne({
+					$pull: { friendRequestsReceived: req.params.id },
+				});
+				res.status(200).send("the request has been deleted");
+			} else {
+				res.status(403).send(
+					"you already deleted the request to this user"
+				);
+			}
+		} catch (err) {
+			res.status(500).send("Error", err);
+		}
+	} else {
+		res.status(403).send("you cant delete friend request");
+	}
 });
 
+// Register and Login of user using google
 router.post("/register/google", async (req, res) => {
 	const { error } = validateGoogleRegister(req.body);
 	if (error) return res.status(400).send(error.details[0].message);
@@ -268,7 +247,6 @@ router.post("/register/google", async (req, res) => {
 			firstName: req.body.firstName,
 			lastName: req.body.lastName,
 			email: req.body.email,
-			password: "123456",
 			profileImage: req.body.profileImage,
 		});
 
@@ -277,11 +255,11 @@ router.post("/register/google", async (req, res) => {
 	}
 });
 
+// Get the number of posts of a particular user
 router.get("/:id/posts", auth, async (req, res) => {
 	const posts = await Post.find();
 	const userPosts = posts.filter((post) => post.user._id == req.params.id);
 	res.status(200).send(userPosts);
-})
-
+});
 
 module.exports = router;

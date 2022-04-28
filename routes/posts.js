@@ -4,6 +4,7 @@ const { validatePost, Post } = require("../models/post");
 const { validateComment } = require("../services/validation");
 const router = express.Router();
 
+// Create a new post
 router.post("/", auth, async (req, res) => {
 	const { error } = validatePost(req.body);
 	if (error) return res.status(400).send(error.details[0].message);
@@ -24,6 +25,7 @@ router.post("/", auth, async (req, res) => {
 	res.status(201).send(post);
 });
 
+// Get all posts
 router.get("/", auth, async (req, res) => {
 	const skip =
 		req.query.skip && /^\d+$/.test(req.query.skip)
@@ -33,6 +35,7 @@ router.get("/", auth, async (req, res) => {
 	res.send(posts);
 });
 
+// Report a particular post
 router.post("/:postId/report", auth, async (req, res) => {
 	const post = await Post.findById(req.params.postId);
 	if (!post) return res.status(404).send("Post not found");
@@ -43,6 +46,7 @@ router.post("/:postId/report", auth, async (req, res) => {
 	return res.status(200).send("Post reported");
 });
 
+// React to a particular post: Like and Dislike
 router.post("/:postId/reaction", auth, async (req, res) => {
 	const post = await Post.findById(req.params.postId);
 	if (!post) return res.status(404).send("Post not found.");
@@ -90,6 +94,7 @@ router.post("/:postId/reaction", auth, async (req, res) => {
 	}
 });
 
+// Get comments of a particular post
 router.get("/:id/comments", auth, async (req, res) => {
 	const post = await Post.findById(req.params.id);
 	if (!post) return res.status(404).send("Post not found.");
@@ -97,6 +102,7 @@ router.get("/:id/comments", auth, async (req, res) => {
 	res.status(200).send(post.comments);
 });
 
+// Create a new comment on a particular post
 router.post("/:id/comments", auth, async (req, res) => {
 	const post = await Post.findById(req.params.id);
 	if (!post) return res.status(404).send("Post not found.");
