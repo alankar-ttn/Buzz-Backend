@@ -8,9 +8,6 @@
     "start": "node index.js",
     "dev": "nodemon"
   },
-  "engines": {
-    "node": "16.14.0"
-  },
   "author": "",
   "license": "ISC",
   "dependencies": {
