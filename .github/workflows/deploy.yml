@@ -24,7 +24,7 @@ jobs:
 
       - name: Copy files to the server
         env:
-          AWS_PEM_FILE: ${{ secrets.   }}
+          AWS_PEM_FILE: ${{ secrets.AWS_PEM_FILE }}
         run: |
           mkdir -p ~/.ssh
           echo "$AWS_PEM_FILE" | tr -d '\r' > ~/.ssh/aws_key.pem
